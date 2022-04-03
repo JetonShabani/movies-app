@@ -1,25 +1,73 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+
+import Movie from './components/Movie';
+
+
+const FEATURED_API = "https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=04c35731a5ee918f014970082a0088b1&page=1";
+
+const IMG_API = "https://image.tmdb.org/t/p/w1280";
+const SEARCH_API = "https://api.themoviedb.org/3/search/movie?&api_key=04c35731a5ee918f014970082a0088b1&query=";
+
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [ movies, setMovies ] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+
+
+    //fetching API from featured api 
+    useEffect(() => {
+        getMovies(FEATURED_API);
+    }, []);
+
+    //fetching API from featured api 
+    const getMovies = (API) => {
+        fetch(API)
+            .then(res => res.json())
+            .then(data => {
+                //console.log(data);
+                setMovies(data.results);
+            });
+    }
+    
+    //handle the search on submit will show movies
+    const handleOnSubmit = (e) => {
+        e.preventDefault();
+        
+        //if search a film fetching featured searching api
+        if(searchTerm) {
+          getMovies(SEARCH_API + searchTerm);
+            
+            //if search a film then search bar empty
+            setSearchTerm("");
+        }
+
+     };
+
+    const handleOnChange = (e) => {
+        setSearchTerm(e.target.value);
+    }
+
+        return (
+        <>
+            <header> 
+                <form onSubmit={handleOnSubmit}>
+                <input className="search " 
+                       type="text" 
+                       placeholder="search..."
+                       value={searchTerm}
+                       onChange={handleOnChange}
+                />
+                </form>
+                
+            </header>
+            <div className="movie-container">
+                
+                {movies.length > 0 && movies.map((movie) => (
+                    <Movie key={movie.id} {...movie} />
+                ))}
+            </div>
+        </>
+        );
 }
 
 export default App;
